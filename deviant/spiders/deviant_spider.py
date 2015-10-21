@@ -1,28 +1,35 @@
 # -*- coding: utf-8 -*-
 
 import urllib
+import time
 import errno
 import os
 import scrapy
+from selenium import webdriver
 from deviant.items import DeviantItem
 
 class DeviantSpider(scrapy.Spider):
     name = "deviant"
 
-    allowed_domains = ["blackassassin999.deviantart.com"]
+    allowed_domains = ["art0fck.deviantart.com"]
     start_urls = [
 #            "http://viaestelar.deviantart.com/gallery/"
-            "http://blackassassin999.deviantart.com/gallery/51077384/other-fan-art"
+#            "http://blackassassin999.deviantart.com/gallery/51077384/other-fan-art"
+#            "http://blackassassin999.deviantart.com/gallery/51077371/Deus-EX"
+            "http://art0fck.deviantart.com/gallery/"
             ]
     folder = allowed_domains[0].split('.')[0]
 
-#    def parse(self, response):
-#        yield parse_page_follow_next(response)
+    def __init__(self):
+        self.driver = webdriver.Firefox()
+
+    def __exit__(self):
+        self.driver.close()
 
     def parse(self, response):
-        for deviation in response.xpath('//a[@class="thumb"]/@href'):
+#        for deviation in response.xpath('//a[@class="thumb"]/@href'):
+        for deviation in response.xpath('//a[contains(@class,"thumb")]/@href'):
             url = deviation.extract()
-            print url
             yield scrapy.Request(url, callback=self.parse_deviation)
 
         pagination = response.xpath('//div[@class="pagination"]/ul[@class="pages"]/li[@class="next"]')[0]
@@ -32,18 +39,66 @@ class DeviantSpider(scrapy.Spider):
             next_page = response.urljoin(next_page)
             yield scrapy.Request(next_page, callback=self.parse)
 
-    def parse_deviation(self, response):
-#        download = response.xpath('//div[@class="dev-meta-actions"]/a[@class="dev-page-button dev-page-button-with-text dev-page-download"]/@href')[0].extract()
+    def parse_mature_content(self, response):
+        download = response.xpath('//img[@collect_rid]')
 
-#        if not download:
-#        download = response.xpath('//img[@class="dev-content-normal "]/@src')[0].extract()
-        download = response.xpath('//img[@collect_rid]')[-1].xpath('@src')[0].extract()
-#        download = response.xpath('//img')[-1]
-#        download = download.xpath('@src')[0].extract()
-        print download
+        if not download and "Mature Content" in response.body:
+            self.driver.get(response.url)
+            month = self.driver.find_element_by_xpath('//input[@id="month"]')
+            day   = self.driver.find_element_by_xpath('//input[@id="day"]')
+            year  = self.driver.find_element_by_xpath('//input[@id="year"]')
+
+            agree   = self.driver.find_element_by_xpath('//input[@id="agree_tos"]')
+            submit  = self.driver.find_element_by_xpath('//input[contains(@class, "submitbutton")]')
+
+            month.send_keys('10')
+            day.send_keys('21')
+            year.send_keys('1990')
+
+            agree.click()
+            submit.click()
+
+
+
+    def parse_deviation(self, response):
+        download = response.xpath('//img[@collect_rid]')
+
+        if not download and "Mature Content" in response.body:
+            #TODO: Use selenium once and to throw cookies to Scrapy, so that it can continue by itself
+            print response.url + ": Mature Content detected, gonna try to bypass"
+            self.driver.get(response.url)
+
+            try:
+                month = self.driver.find_element_by_xpath('//input[@id="month"]')
+                day   = self.driver.find_element_by_xpath('//input[@id="day"]')
+                year  = self.driver.find_element_by_xpath('//input[@id="year"]')
+    
+                agree   = self.driver.find_element_by_xpath('//input[@id="agree_tos"]')
+                submit  = self.driver.find_element_by_xpath('//input[contains(@class, "submitbutton")]')
+    
+                month.send_keys('10')
+                day.send_keys('21')
+                year.send_keys('1990')
+    
+                agree.click()
+                submit.click()
+            except:
+                pass
+
+            sel = scrapy.Selector(text=self.driver.page_source)
+            download = sel.xpath('//img[@collect_rid]')
+#            download = download[-1].xpath('@src')[0].extract()
+#            print "Got some download from MC section: " 
+#            print download
+#
+#            filename = download.split('/')[-1]
+#
+#            urllib.urlretrieve(download, filename)
 
 
         if download:
+            download = download[-1].xpath('@src')[0].extract()
+
             filename = download.split('/')[-1]
 
             try:
@@ -52,10 +107,14 @@ class DeviantSpider(scrapy.Spider):
                 if exc.errno != errno.EEXIST:
                     raise
 
-#            call(["mkdir " + self.folder])
+
             filepath = self.folder + '/' + filename
-#            filepath = filename
-            urllib.urlretrieve(download, filepath)
+
+            if not os.path.isfile(filepath):
+                print filename + ": don't have this one, gonna download"
+                urllib.urlretrieve(download, filepath)
+            else:
+                print filename + ": I already have it, skipping"
 
 #            about = response.xpath('//div[@class="dev-view-about-content"]')
 #            item = DeviantItem()
