@@ -91,3 +91,21 @@ console.error: BroadcastService:
   Stack:
     remoteSettingsFunction/remoteSettings.pollChanges@resource://services-settings/remote-settings.js:201:13
 
+1566857311179	mozrunner::runner	INFO	Running command: "/usr/bin/firefox" "-marionette" "-foreground" "-no-remote" "-profile" "/tmp/rust_mozprofile.bTgVs40ptuDh"
+1566857312012	addons.webextension.screenshots@mozilla.org	WARN	Loading extension 'screenshots@mozilla.org': Reading manifest: Invalid extension permission: mozillaAddons
+1566857312012	addons.webextension.screenshots@mozilla.org	WARN	Loading extension 'screenshots@mozilla.org': Reading manifest: Invalid extension permission: telemetry
+1566857312012	addons.webextension.screenshots@mozilla.org	WARN	Loading extension 'screenshots@mozilla.org': Reading manifest: Invalid extension permission: resource://pdf.js/
+1566857312013	addons.webextension.screenshots@mozilla.org	WARN	Loading extension 'screenshots@mozilla.org': Reading manifest: Invalid extension permission: about:reader*
+1566857314967	Marionette	INFO	Listening on port 41059
+1566857315002	Marionette	WARN	TLS certificate errors will be ignored for this session
+1566857380076	mozrunner::runner	INFO	Running command: "/usr/bin/firefox" "-marionette" "-foreground" "-no-remote" "-profile" "/tmp/rust_mozprofile.MRu7O0PpTXvM"
+1566857380767	addons.webextension.screenshots@mozilla.org	WARN	Loading extension 'screenshots@mozilla.org': Reading manifest: Invalid extension permission: mozillaAddons
+1566857380767	addons.webextension.screenshots@mozilla.org	WARN	Loading extension 'screenshots@mozilla.org': Reading manifest: Invalid extension permission: telemetry
+1566857380767	addons.webextension.screenshots@mozilla.org	WARN	Loading extension 'screenshots@mozilla.org': Reading manifest: Invalid extension permission: resource://pdf.js/
+1566857380767	addons.webextension.screenshots@mozilla.org	WARN	Loading extension 'screenshots@mozilla.org': Reading manifest: Invalid extension permission: about:reader*
+1566857383726	Marionette	INFO	Listening on port 43779
+1566857383798	Marionette	WARN	TLS certificate errors will be ignored for this session
+1566857388514	Marionette	INFO	Stopped listening on port 43779
+[Parent 2357, Gecko_IOThread] WARNING: pipe error (79): Connection reset by peer: file /build/firefox-BlSS22/firefox-68.0.2+linuxmint1+tina/ipc/chromium/src/chrome/common/ipc_channel_posix.cc, line 358
+[Parent 2357, Gecko_IOThread] WARNING: pipe error (70): Connection reset by peer: file /build/firefox-BlSS22/firefox-68.0.2+linuxmint1+tina/ipc/chromium/src/chrome/common/ipc_channel_posix.cc, line 358
+1566857403789	Marionette	INFO	Stopped listening on port 41059

@@ -1,24 +1,39 @@
 # -*- coding: utf-8 -*-
 
-import urllib
+from urllib.request import urlretrieve
 import time
 import errno
 import os
 import scrapy
+import pickle
 from selenium import webdriver
 from deviant.items import DeviantItem
 from deviant.config import *
 
+login = "Aromidas"
+password = "cleenock"
+
+
 class DeviantSpider(scrapy.Spider):
     name = "deviant"
+
+    cookies = {}
 
     def __init__(self):
         self.driver = webdriver.Firefox()
         self.start_urls = URLS
 
+        with open("cookies.pkl", "rb") as f:
+            cookies_data = pickle.load(f)
+            for i in cookies_data:
+                self.cookies[i['name']] = i['value']
+            print("Cookies loaded sucessfully: ")
+            print(self.cookies)
+
         self.allowed_domains = []
         for i in self.start_urls:
             domain = i.replace('http://', '')
+            domain = i.replace('https://', '')
             domain = domain.split('/')[0]
             self.allowed_domains.append(domain)
 
@@ -27,13 +42,22 @@ class DeviantSpider(scrapy.Spider):
     def __exit__(self):
         self.driver.close()
 
+
+    def make_requests_from_url(self, url):
+        request = super(DeviantSpider, self).make_requests_from_url(url)
+        request.cookies.update(self.cookies)
+        return request
+
+
     def parse(self, response):
         for deviation in response.xpath('//a[contains(@class,"thumb")]/@href'):
             url = deviation.extract()
             print("Found Deviation: " + url)
-            yield scrapy.Request(url, callback=self.parse_deviation)
+            yield scrapy.Request(url, cookies=self.cookies, callback=self.parse_deviation)
 
-        pagination = response.xpath('//div[@class="pagination"]/ul[@class="pages"]/li[@class="next"]')[0]
+        pagination = response.xpath('//div[@class="pagination"]/ul[@class="pages"]/li[@class="next"]')
+        if pagination:
+            pagination = pagination[0]
         next_page = pagination.xpath('a[not (contains (@class, "disabled"))]/@href').extract()
 
         if next_page:
@@ -75,7 +99,8 @@ class DeviantSpider(scrapy.Spider):
         if download:
             download = download[-1].xpath('@src')[0].extract()
 
-            filename = download.split('/')[-1]
+            extension = download.split('/')[-1].split('?')[0].split('.')[-1]
+            filename = response.url.split('/')[-1] + '.' + extension
 
             try:
                 os.makedirs(self.folder)
@@ -87,7 +112,7 @@ class DeviantSpider(scrapy.Spider):
 
             if not os.path.isfile(filepath):
                 print (filename + ": don't have this one, gonna download")
-                urllib.urlretrieve(download, filepath)
+                urlretrieve(download, filepath)
             else:
                 print (filename + ": I already have it, skipping")
 
