@@ -30,10 +30,12 @@ class DeviantSpider(scrapy.Spider):
     def parse(self, response):
         for deviation in response.xpath('//a[contains(@class,"thumb")]/@href'):
             url = deviation.extract()
+            print("Found Deviation: " + url)
             yield scrapy.Request(url, callback=self.parse_deviation)
 
         pagination = response.xpath('//div[@class="pagination"]/ul[@class="pages"]/li[@class="next"]')[0]
         next_page = pagination.xpath('a[not (contains (@class, "disabled"))]/@href').extract()
+
         if next_page:
             next_page = next_page[0].split('/')[-1]
             next_page = response.urljoin(next_page)
@@ -41,11 +43,12 @@ class DeviantSpider(scrapy.Spider):
 
 
     def parse_deviation(self, response):
+        print ("Parsing deviation:" + response.url)
         download = response.xpath('//img[@collect_rid]')
 
         if not download and "Mature Content" in response.body:
             #TODO: Use selenium once and to throw cookies to Scrapy, so that it can continue all by itself
-            print response.url + ": Mature Content detected, gonna try to bypass"
+            print (response.url + ": Mature Content detected, gonna try to bypass")
             self.driver.get(response.url)
 
             try:
@@ -76,18 +79,17 @@ class DeviantSpider(scrapy.Spider):
 
             try:
                 os.makedirs(self.folder)
-            except OSError, exc:
-                if exc.errno != errno.EEXIST:
+            except OSError as e:
+                if e.errno != errno.EEXIST:
                     raise
-
 
             filepath = self.folder + '/' + filename
 
             if not os.path.isfile(filepath):
-                print filename + ": don't have this one, gonna download"
+                print (filename + ": don't have this one, gonna download")
                 urllib.urlretrieve(download, filepath)
             else:
-                print filename + ": I already have it, skipping"
+                print (filename + ": I already have it, skipping")
 
 #            about = response.xpath('//div[@class="dev-view-about-content"]')
 #            item = DeviantItem()

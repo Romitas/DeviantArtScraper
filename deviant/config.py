@@ -3,6 +3,6 @@
 import scrapy
 
 URLS = [
-        "http://viaestelar.deviantart.com/gallery/",
+        "https://www.deviantart.com/88grzes/gallery/39299171/fantasy"
         ]
 
