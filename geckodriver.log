@@ -109,3 +109,15 @@ console.error: BroadcastService:
 [Parent 2357, Gecko_IOThread] WARNING: pipe error (79): Connection reset by peer: file /build/firefox-BlSS22/firefox-68.0.2+linuxmint1+tina/ipc/chromium/src/chrome/common/ipc_channel_posix.cc, line 358
 [Parent 2357, Gecko_IOThread] WARNING: pipe error (70): Connection reset by peer: file /build/firefox-BlSS22/firefox-68.0.2+linuxmint1+tina/ipc/chromium/src/chrome/common/ipc_channel_posix.cc, line 358
 1566857403789	Marionette	INFO	Stopped listening on port 41059
+1566942050746	mozrunner::runner	INFO	Running command: "/usr/bin/firefox" "-marionette" "-foreground" "-no-remote" "-profile" "/tmp/rust_mozprofile.So0IWVkm8Uk0"
+1566942051661	addons.webextension.screenshots@mozilla.org	WARN	Loading extension 'screenshots@mozilla.org': Reading manifest: Invalid extension permission: mozillaAddons
+1566942051661	addons.webextension.screenshots@mozilla.org	WARN	Loading extension 'screenshots@mozilla.org': Reading manifest: Invalid extension permission: telemetry
+1566942051662	addons.webextension.screenshots@mozilla.org	WARN	Loading extension 'screenshots@mozilla.org': Reading manifest: Invalid extension permission: resource://pdf.js/
+1566942051663	addons.webextension.screenshots@mozilla.org	WARN	Loading extension 'screenshots@mozilla.org': Reading manifest: Invalid extension permission: about:reader*
+1566942054100	Marionette	INFO	Listening on port 39627
+1566942054160	Marionette	WARN	TLS certificate errors will be ignored for this session
+
+(/usr/lib/firefox/firefox:4193): dconf-WARNING **: 00:41:07.226: Unable to open /var/lib/flatpak/exports/share/dconf/profile/user: Permission denied
+[Parent 4116, Gecko_IOThread] WARNING: pipe error (70): Connection reset by peer: file /build/firefox-BlSS22/firefox-68.0.2+linuxmint1+tina/ipc/chromium/src/chrome/common/ipc_channel_posix.cc, line 358
+[Parent 4116, Gecko_IOThread] WARNING: pipe error (93): Connection reset by peer: file /build/firefox-BlSS22/firefox-68.0.2+linuxmint1+tina/ipc/chromium/src/chrome/common/ipc_channel_posix.cc, line 358
+1566942483305	Marionette	INFO	Stopped listening on port 39627

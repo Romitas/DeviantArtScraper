@@ -50,7 +50,9 @@ class DeviantSpider(scrapy.Spider):
     def parse(self, response):
         offset = response.meta.get('offset', 0)
 
-        folder = os.path.join(OUTPUT_FOLDER, response.url.split('deviantart.com/')[-1].split('/')[0])
+        url = response.url.split('?')[0].strip('/').split('deviantart.com/')[-1].split('/')
+        folder_name = '%s_%s' % (url[0], url[-1])
+        folder = os.path.join(OUTPUT_FOLDER, folder_name)
         has_deviations_on_the_page = False
 
         for deviation in response.xpath('//a[contains(@class,"thumb")]/@href'):
@@ -83,12 +85,12 @@ class DeviantSpider(scrapy.Spider):
             filename = author + '_' + response.url.split('/')[-1] + '.' + extension
 
             try:
-                os.makedirs(self.folder)
+                os.makedirs(folder)
             except OSError as e:
                 if e.errno != errno.EEXIST:
                     raise
 
-            filepath = self.folder + '/' + filename
+            filepath = os.path.join(folder, filename)
 
             if not os.path.isfile(filepath):
                 print (filename + ": don't have this one, gonna download")
@@ -96,11 +98,11 @@ class DeviantSpider(scrapy.Spider):
             else:
                 print (filename + ": I already have it, skipping")
 
-            about = response.xpath('//div[@class="dev-view-about-content"]')
-            item = DeviantItem()
-            item['name'] = about.xpath('div[@class="dev-title-container"]/h1/a/@text').extract()
-            item['author'] = about.xpath('div[@class="dev-title-container"]/h1/small/span[@class="username-with-symbol u"]/a[@class="u regular username"/@text').extract()
-            item['url'] = download
-
-            yield item
+#            about = response.xpath('//div[@class="dev-view-about-content"]')
+#            item = DeviantItem()
+#            item['name'] = about.xpath('div[@class="dev-title-container"]/h1/a/@text').extract()
+#            item['author'] = about.xpath('div[@class="dev-title-container"]/h1/small/span[@class="username-with-symbol u"]/a[@class="u regular username"/@text').extract()
+#            item['url'] = download
+#
+#            yield item
 

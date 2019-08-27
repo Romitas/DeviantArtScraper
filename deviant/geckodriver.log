@@ -137,3 +137,11 @@ console.error: BroadcastService:
 1566859699494	Marionette	WARN	TLS certificate errors will be ignored for this session
 [Parent 4152, Gecko_IOThread] WARNING: pipe error (78): Connection reset by peer: file /build/firefox-BlSS22/firefox-68.0.2+linuxmint1+tina/ipc/chromium/src/chrome/common/ipc_channel_posix.cc, line 358
 1566859743559	Marionette	INFO	Stopped listening on port 38281
+console.error: BroadcastService: 
+  receivedBroadcastMessage: handler for
+  remote-settings/monitor_changes
+  threw error:
+  Message: Error: Polling for changes failed: http://%(server)s/dummy/blocklist//buckets/monitor/collections/changes/records?_expected=%221561548844810%22 is not a valid URL..
+  Stack:
+    remoteSettingsFunction/remoteSettings.pollChanges@resource://services-settings/remote-settings.js:201:13
+
