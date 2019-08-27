@@ -6,7 +6,7 @@ import errno
 import os
 import scrapy
 import pickle
-from selenium import webdriver
+#from selenium import webdriver
 from deviant.items import DeviantItem
 from deviant.config import *
 
@@ -20,10 +20,10 @@ class DeviantSpider(scrapy.Spider):
     cookies = {}
 
     def __init__(self):
-        self.driver = webdriver.Firefox()
+#        self.driver = webdriver.Firefox()
         self.start_urls = URLS
 
-        with open("cookies.pkl", "rb") as f:
+        with open("deviant/cookies.pkl", "rb") as f:
             cookies_data = pickle.load(f)
             for i in cookies_data:
                 self.cookies[i['name']] = i['value']
@@ -40,7 +40,8 @@ class DeviantSpider(scrapy.Spider):
         self.folder = self.allowed_domains[0].split('.')[0]
 
     def __exit__(self):
-        self.driver.close()
+        pass
+#        self.driver.close()
 
 
     def make_requests_from_url(self, url):
@@ -50,57 +51,64 @@ class DeviantSpider(scrapy.Spider):
 
 
     def parse(self, response):
+        self.folder = response.url.split('deviantart.com/')[-1].split('/')[0]
+
         for deviation in response.xpath('//a[contains(@class,"thumb")]/@href'):
             url = deviation.extract()
             print("Found Deviation: " + url)
             yield scrapy.Request(url, cookies=self.cookies, callback=self.parse_deviation)
 
-        pagination = response.xpath('//div[@class="pagination"]/ul[@class="pages"]/li[@class="next"]')
+        pagination = response.xpath('//div[@class="pagination"]/ul[@class="pages"]/li[contains(@class, "next")]')
+        print (pagination)
         if pagination:
             pagination = pagination[0]
+        print (pagination)
         next_page = pagination.xpath('a[not (contains (@class, "disabled"))]/@href').extract()
+        print ("NEXT PAGE: %s" % next_page)
 
         if next_page:
             next_page = next_page[0].split('/')[-1]
             next_page = response.urljoin(next_page)
-            yield scrapy.Request(next_page, callback=self.parse)
+            yield scrapy.Request(next_page, cookies=self.cookies, callback=self.parse)
 
 
     def parse_deviation(self, response):
         print ("Parsing deviation:" + response.url)
         download = response.xpath('//img[@collect_rid]')
 
-        if not download and "Mature Content" in response.body:
+        if not download and "Mature Content" in str(response.body):
             #TODO: Use selenium once and to throw cookies to Scrapy, so that it can continue all by itself
             print (response.url + ": Mature Content detected, gonna try to bypass")
-            self.driver.get(response.url)
+#            self.driver.get(response.url)
 
-            try:
-                month = self.driver.find_element_by_xpath('//input[@id="month"]')
-                day   = self.driver.find_element_by_xpath('//input[@id="day"]')
-                year  = self.driver.find_element_by_xpath('//input[@id="year"]')
-    
-                agree   = self.driver.find_element_by_xpath('//input[@id="agree_tos"]')
-                submit  = self.driver.find_element_by_xpath('//input[contains(@class, "submitbutton")]')
-    
-                month.send_keys('10')
-                day.send_keys('21')
-                year.send_keys('1990')
-    
-                agree.click()
-                submit.click()
-            except:
-                pass
-
-            sel = scrapy.Selector(text=self.driver.page_source)
-            download = sel.xpath('//img[@collect_rid]')
+#            try:
+#                month = self.driver.find_element_by_xpath('//input[@id="month"]')
+#                day   = self.driver.find_element_by_xpath('//input[@id="day"]')
+#                year  = self.driver.find_element_by_xpath('//input[@id="year"]')
+#    
+#                agree   = self.driver.find_element_by_xpath('//input[@id="agree_tos"]')
+#                submit  = self.driver.find_element_by_xpath('//input[contains(@class, "submitbutton")]')
+#    
+#                month.send_keys('10')
+#                day.send_keys('21')
+#                year.send_keys('1990')
+#    
+#                agree.click()
+#                submit.click()
+#            except:
+#                pass
+#
+#            sel = scrapy.Selector(text=self.driver.page_source)
+#            download = sel.xpath('//img[@collect_rid]')
+            download = response.xpath('//img[@collect_rid]')
 
 
         if download:
             download = download[-1].xpath('@src')[0].extract()
 
             extension = download.split('/')[-1].split('?')[0].split('.')[-1]
-            filename = response.url.split('/')[-1] + '.' + extension
+            author = response.url.split('deviantart.com/')[-1].split('/')[0]
+            filename = author + '_' + response.url.split('/')[-1] + '.' + extension
 
             try:
                 os.makedirs(self.folder)
