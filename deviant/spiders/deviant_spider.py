@@ -10,11 +10,6 @@ import pickle
 from deviant.items import DeviantItem
 from deviant.config import *
 
-login = "Aromidas"
-password = "cleenock"
-
-
-
 class DeviantSpider(scrapy.Spider):
     name = "deviant"
 
@@ -29,8 +24,7 @@ class DeviantSpider(scrapy.Spider):
             cookies_data = pickle.load(f)
             for i in cookies_data:
                 self.cookies[i['name']] = i['value']
-            print("Cookies loaded sucessfully: ")
-            print(self.cookies)
+            print("Cookies loaded successfully")
 
         self.allowed_domains = []
         for i in self.start_urls:
@@ -42,10 +36,14 @@ class DeviantSpider(scrapy.Spider):
     def __exit__(self):
         print("Total deviations scraped: %d" % self.total_deviations_scraped)
 
-    def make_requests_from_url(self, url):
-        request = super(DeviantSpider, self).make_requests_from_url(url)
-        request.cookies.update(self.cookies)
-        return request
+    def start_requests(self):
+        for url in self.start_urls:
+            request = scrapy.Request(
+                    url,
+                    cookies = self.cookies,
+                    callback=self.parse
+                    )
+            yield request
 
     def parse(self, response):
         offset = response.meta.get('offset', 0)
@@ -60,12 +58,15 @@ class DeviantSpider(scrapy.Spider):
             print("Found Deviation: " + url)
             has_deviations_on_the_page = True
             self.total_deviations_scraped += 1
-            yield scrapy.Request(url, cookies=self.cookies, callback=self.parse_deviation, meta={'folder': folder})
+            yield scrapy.Request(url, cookies=self.cookies, callback=self.parse_deviation, meta={'folder': folder}, dont_filter=True)
 
         if has_deviations_on_the_page:
             offset += 24
             next_page = response.urljoin('?offset=%d' % offset)
             yield scrapy.Request(next_page, cookies=self.cookies, callback=self.parse, meta={'offset': offset})
+
+    def already_have_deviation(self, url):
+        pass
 
     def parse_deviation(self, response):
         print ("Parsing deviation:" + response.url)

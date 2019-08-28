@@ -1,0 +1,7 @@
+*.pyc
+*.swp
+*.swn
+geckodriver.log
+[output]/
+deviant/__pycache__/
+deviant/spiders/__pycache__/
